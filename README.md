@@ -1,13 +1,15 @@
 # GlicoDose Admin
 
-Painel interno (React + Tailwind) com login único para ver métricas do mesmo projeto Supabase dos apps `diabetes` (Flutter) e `diabetes-medicos` (portal).
+Painel interno (React + Tailwind) com login para métricas do mesmo projeto Supabase dos apps `diabetes` (Flutter) e `diabetes-medicos` (portal).
 
 ## O que mostra
 
-- Quantidade de médicos cadastrados (`doctors`)
-- Quantidade total de pacientes no app (`profiles`, excluindo médicos e admins)
-- Pacientes vinculados por médico (`doctor_patients`)
-- Doações (`/doacoes`): MRR estimado das assinaturas Stripe ativas de médicos (abas Total / Médicos / Pacientes)
+- **Visão geral (`/`):** médicos, pacientes, pacientes por médico
+- **Doações (`/doacoes`):** MRR estimado
+  - Médicos: assinaturas Stripe ativas/grace
+  - Pacientes: apoiadores RevenueCat (espelhados em `profiles`)
+  - Total: soma dos dois
+- **Uso de IA (`/ia`):** chamadas, erros, tokens, latência e custo estimado OpenAI (`ai_usage_logs`, últimos 7/30/90 dias)
 
 ## Setup
 
@@ -19,17 +21,19 @@ cp .env.example .env
 
 Preencha com o mesmo `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` dos outros projetos.
 
-2. Aplique a migration compartilhada [`../diabetes/supabase/migrations/010_admin_dashboard.sql`](../diabetes/supabase/migrations/010_admin_dashboard.sql) (a partir de `/diabetes`):
+2. Aplique as migrations no app paciente (`/diabetes`):
 
 ```bash
 cd ../diabetes
+# … até 012_rx_ai_ops.sql (inclui get_admin_donation_stats atualizado + get_admin_ai_stats)
 supabase db query --linked -f supabase/migrations/010_admin_dashboard.sql
 supabase db query --linked -f supabase/migrations/011_admin_donations.sql
+supabase db query --linked -f supabase/migrations/012_rx_ai_ops.sql
 ```
 
-Isso cria `admin_users`, `is_admin()`, `get_admin_dashboard_stats()` e `get_admin_donation_stats()`.
+Isso cria `admin_users`, `is_admin()`, `get_admin_dashboard_stats()`, `get_admin_donation_stats()` e `get_admin_ai_stats()`.
 
-3. Crie o usuário admin e conceda permissão (service role — **nunca** no Vite):
+3. Crie o usuário admin (service role — **nunca** no Vite):
 
 ```bash
 cd ../diabetes-admin
@@ -38,7 +42,7 @@ SUPABASE_SERVICE_ROLE_KEY="sua_service_role_key" \
 node scripts/bootstrap-admin.mjs
 ```
 
-Defaults do script: `gugazimmermann+admin@gmail.com` / `1234567890` (sobrescreva com `ADMIN_EMAIL` / `ADMIN_PASSWORD` se quiser).
+Sobrescreva defaults com `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
 
 4. Rode o app:
 
@@ -51,5 +55,13 @@ Abre em `http://localhost:5174`.
 
 ## Auth
 
-- Somente login (sem criar conta no UI)
-- Após autenticar, o app exige linha em `admin_users`; caso contrário faz logout
+- Somente login (sem signup no UI)
+- Após autenticar, exige linha em `admin_users`; senão faz logout
+
+## Projetos irmãos
+
+| Repo | Papel |
+| --- | --- |
+| `diabetes` | App paciente + migrations canônicas |
+| `diabetes-medicos` | Portal médico |
+| `diabetes-site` | Landing |

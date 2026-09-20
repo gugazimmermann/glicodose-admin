@@ -5,6 +5,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { DonationsPage } from './pages/DonationsPage'
+import { AiUsagePage } from './pages/AiUsagePage'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
             <Route element={<AppShell />}>
               <Route index element={<DashboardPage />} />
               <Route path="doacoes" element={<DonationsPage />} />
+              <Route path="ia" element={<AiUsagePage />} />
             </Route>
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

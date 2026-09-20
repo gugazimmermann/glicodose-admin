@@ -23,6 +23,9 @@ function MainNav({ className = '' }: { className?: string }) {
       <NavLink to="/doacoes" className={navLinkClass}>
         Doações
       </NavLink>
+      <NavLink to="/ia" className={navLinkClass}>
+        Uso de IA
+      </NavLink>
     </nav>
   )
 }

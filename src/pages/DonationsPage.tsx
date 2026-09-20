@@ -66,7 +66,10 @@ export function DonationsPage() {
     return {
       active_count: stats.total.active_count,
       monthly_brl: stats.total.monthly_brl,
-      supporters: stats.doctors.supporters,
+      supporters: [
+        ...stats.doctors.supporters,
+        ...stats.patients.supporters,
+      ],
     }
   }, [stats, tab])
 
@@ -74,7 +77,7 @@ export function DonationsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Doações"
-        description="Assinaturas ativas de apoio. Por enquanto só Stripe do portal de médicos."
+        description="Assinaturas ativas de apoio: Stripe (médicos) e RevenueCat (pacientes)."
         action={
           <Button
             variant="secondary"
@@ -126,8 +129,8 @@ export function DonationsPage() {
 
       {tab === 'total' ? (
         <Alert variant="info">
-          O total inclui apenas assinaturas Stripe de médicos. Doações de
-          pacientes (app) entram depois.
+          O total soma apoiadores médicos (Stripe) e pacientes (RevenueCat /
+          lojas).
         </Alert>
       ) : null}
 
@@ -138,12 +141,14 @@ export function DonationsPage() {
               ? 'Apoiadores pacientes'
               : tab === 'doctors'
                 ? 'Apoiadores médicos'
-                : 'Apoiadores (médicos)'}
+                : 'Apoiadores (todos)'}
           </h2>
           <p className="mt-0.5 text-sm text-muted">
             {tab === 'patients'
-              ? 'Integração com doações do app paciente ainda não disponível'
-              : 'Planos Stripe ativos ou em carência'}
+              ? 'Planos ativos ou em carência via RevenueCat'
+              : tab === 'doctors'
+                ? 'Planos Stripe ativos ou em carência'
+                : 'Médicos (Stripe) e pacientes (RevenueCat)'}
           </p>
         </div>
 
@@ -152,10 +157,6 @@ export function DonationsPage() {
             <Skeleton className="h-10" />
             <Skeleton className="h-10" />
           </div>
-        ) : tab === 'patients' ? (
-          <p className="px-5 py-8 text-center text-sm text-muted sm:px-6">
-            Em breve — doações do app paciente.
-          </p>
         ) : !summary || summary.supporters.length === 0 ? (
           <p className="px-5 py-8 text-center text-sm text-muted sm:px-6">
             Nenhum apoiador ativo no momento.

@@ -35,3 +35,29 @@ export type AdminDonationStats = {
   doctors: AdminDonationSegment
   patients: AdminDonationSegment
 }
+
+export type AdminAiFunctionStat = {
+  function_name: string
+  calls: number
+  errors: number
+  prompt_tokens: number
+  completion_tokens: number
+  total_tokens: number
+  estimated_cost_usd: number
+  avg_latency_ms: number | null
+}
+
+export type AdminAiStats = {
+  days: number
+  since: string
+  totals: {
+    calls: number
+    errors: number
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+    estimated_cost_usd: number
+    avg_latency_ms: number | null
+  }
+  by_function: AdminAiFunctionStat[]
+}
