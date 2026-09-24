@@ -39,10 +39,11 @@ Isso cria `admin_users`, `is_admin()`, `get_admin_dashboard_stats()`, `get_admin
 cd ../diabetes-admin
 SUPABASE_URL="$VITE_SUPABASE_URL" \
 SUPABASE_SERVICE_ROLE_KEY="sua_service_role_key" \
+ADMIN_PASSWORD="sua_senha_segura" \
 node scripts/bootstrap-admin.mjs
 ```
 
-Defaults: `contato@glicodose.app` / `GlicoDose666`. Sobrescreva com `ADMIN_EMAIL` / `ADMIN_PASSWORD` se necessário. Rode o bootstrap sempre que a senha no Auth precisar ser sincronizada.
+`ADMIN_PASSWORD` é obrigatório. E-mail default: `contato@glicodose.app` (sobrescreva com `ADMIN_EMAIL` se necessário). Rode o bootstrap sempre que a senha no Auth precisar ser sincronizada.
 
 4. Rode o app:
 

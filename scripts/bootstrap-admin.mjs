@@ -7,7 +7,8 @@
  *
  * Opcionais:
  *   ADMIN_EMAIL (default: contato@glicodose.app)
- *   ADMIN_PASSWORD (default: GlicoDose666)
+ * Obrigatório:
+ *   ADMIN_PASSWORD
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -16,12 +17,17 @@ const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const email =
   process.env.ADMIN_EMAIL || 'contato@glicodose.app'
-const password = process.env.ADMIN_PASSWORD || 'GlicoDose666'
+const password = process.env.ADMIN_PASSWORD
 
 if (!url || !serviceKey) {
   console.error(
     'Defina SUPABASE_URL (ou VITE_SUPABASE_URL) e SUPABASE_SERVICE_ROLE_KEY.',
   )
+  process.exit(1)
+}
+
+if (!password) {
+  console.error('Defina ADMIN_PASSWORD (não use senha embutida no código).')
   process.exit(1)
 }
 
