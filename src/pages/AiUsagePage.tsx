@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { AdminAiStats } from '../types/database'
+import type { AdminAiFunctionStat, AdminAiStats } from '../types/database'
 import { Alert } from '../components/ui/Alert'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -8,6 +8,52 @@ import { PageHeader } from '../components/ui/PageHeader'
 import { Skeleton } from '../components/ui/Spinner'
 import { StatTile } from '../components/ui/StatTile'
 import { controlClass } from '../components/ui/Input'
+
+const KNOWN_FUNCTIONS: { name: string; label: string }[] = [
+  { name: 'recommend-insulin', label: 'Insulina recomendada' },
+  {
+    name: 'analyze-patient-history',
+    label: 'Análise de histórico (médicos)',
+  },
+  { name: 'transcribe-food', label: 'Transcrição de alimento' },
+]
+
+const FUNCTION_LABELS: Record<string, string> = Object.fromEntries(
+  KNOWN_FUNCTIONS.map((f) => [f.name, f.label]),
+)
+
+function emptyFunctionStat(functionName: string): AdminAiFunctionStat {
+  return {
+    function_name: functionName,
+    calls: 0,
+    errors: 0,
+    prompt_tokens: 0,
+    completion_tokens: 0,
+    total_tokens: 0,
+    estimated_cost_usd: 0,
+    avg_latency_ms: null,
+  }
+}
+
+/** Merge RPC rows with known functions so médicos/Whisper always appear. */
+function mergeByFunction(
+  rows: AdminAiFunctionStat[] | undefined,
+): AdminAiFunctionStat[] {
+  const byName = new Map((rows ?? []).map((r) => [r.function_name, r]))
+  const merged: AdminAiFunctionStat[] = KNOWN_FUNCTIONS.map(
+    (f) => byName.get(f.name) ?? emptyFunctionStat(f.name),
+  )
+  for (const row of rows ?? []) {
+    if (!FUNCTION_LABELS[row.function_name]) {
+      merged.push(row)
+    }
+  }
+  return merged
+}
+
+function formatFunctionLabel(functionName: string): string {
+  return FUNCTION_LABELS[functionName] ?? functionName
+}
 
 function formatUsd(value: number): string {
   return new Intl.NumberFormat('en-US', {
@@ -50,12 +96,16 @@ export function AiUsagePage() {
   }, [load])
 
   const totals = stats?.totals
+  const byFunction = useMemo(
+    () => mergeByFunction(stats?.by_function),
+    [stats?.by_function],
+  )
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Uso de IA"
-        description="Chamadas OpenAI, erros, latência e custo estimado (observabilidade)."
+        description="Chamadas OpenAI, erros, latência e custo estimado (observabilidade). Linhas históricas backfilled podem ter tokens/custo 0."
         action={
           <div className="flex flex-wrap items-center gap-2">
             <select
@@ -117,7 +167,8 @@ export function AiUsagePage() {
         <div className="border-b border-line px-5 py-4 sm:px-6">
           <h2 className="text-base font-semibold text-ink">Por função</h2>
           <p className="mt-0.5 text-sm text-muted">
-            recommend-insulin, analyze-patient-history, etc.
+            Insulina recomendada, análise de histórico (médicos) e transcrição
+            de alimento.
           </p>
         </div>
         {loading && !stats ? (
@@ -125,7 +176,7 @@ export function AiUsagePage() {
             <Skeleton className="h-10" />
             <Skeleton className="h-10" />
           </div>
-        ) : !stats || stats.by_function.length === 0 ? (
+        ) : !stats ? (
           <p className="px-5 py-8 text-center text-sm text-muted sm:px-6">
             Nenhum log de IA no período. Rode as Edge Functions após aplicar a
             migration 012.
@@ -144,13 +195,16 @@ export function AiUsagePage() {
                 </tr>
               </thead>
               <tbody>
-                {stats.by_function.map((row) => (
+                {byFunction.map((row) => (
                   <tr
                     key={row.function_name}
                     className="border-b border-line/70 last:border-0"
                   >
                     <td className="px-5 py-3 font-medium text-ink sm:px-6">
-                      {row.function_name}
+                      <span>{formatFunctionLabel(row.function_name)}</span>
+                      <span className="mt-0.5 block text-xs font-normal text-muted">
+                        {row.function_name}
+                      </span>
                     </td>
                     <td className="px-3 py-3 text-right tabular-nums">
                       {row.calls}

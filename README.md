@@ -42,7 +42,7 @@ SUPABASE_SERVICE_ROLE_KEY="sua_service_role_key" \
 node scripts/bootstrap-admin.mjs
 ```
 
-Sobrescreva defaults com `ADMIN_EMAIL` / `ADMIN_PASSWORD`.
+Defaults: `contato@glicodose.app` / `GlicoDose666`. Sobrescreva com `ADMIN_EMAIL` / `ADMIN_PASSWORD` se necessário. Rode o bootstrap sempre que a senha no Auth precisar ser sincronizada.
 
 4. Rode o app:
 
@@ -56,6 +56,7 @@ Abre em `http://localhost:5174`.
 ## Auth
 
 - Somente login (sem signup no UI)
+- E-mail permitido: `contato@glicodose.app` (allowlist no client)
 - Após autenticar, exige linha em `admin_users`; senão faz logout
 
 ## Projetos irmãos

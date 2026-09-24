@@ -6,8 +6,8 @@
  *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/bootstrap-admin.mjs
  *
  * Opcionais:
- *   ADMIN_EMAIL (default: gugazimmermann+admin@gmail.com)
- *   ADMIN_PASSWORD (default: 1234567890)
+ *   ADMIN_EMAIL (default: contato@glicodose.app)
+ *   ADMIN_PASSWORD (default: GlicoDose666)
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -15,8 +15,8 @@ import { createClient } from '@supabase/supabase-js'
 const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const email =
-  process.env.ADMIN_EMAIL || 'gugazimmermann+admin@gmail.com'
-const password = process.env.ADMIN_PASSWORD || '1234567890'
+  process.env.ADMIN_EMAIL || 'contato@glicodose.app'
+const password = process.env.ADMIN_PASSWORD || 'GlicoDose666'
 
 if (!url || !serviceKey) {
   console.error(

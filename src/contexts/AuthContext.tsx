@@ -23,6 +23,12 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+const ALLOWED_ADMIN_EMAIL = 'contato@glicodose.app'
+
+function isAllowedAdminEmail(email: string | undefined | null): boolean {
+  return (email ?? '').trim().toLowerCase() === ALLOWED_ADMIN_EMAIL
+}
+
 async function checkIsAdmin(userId: string): Promise<boolean> {
   const { data, error } = await supabase
     .from('admin_users')
@@ -49,6 +55,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
+      if (!isAllowedAdminEmail(nextSession.user.email)) {
+        await supabase.auth.signOut()
+        setSession(null)
+        setIsAdmin(false)
+        setAuthError('Esta conta não tem permissão de administrador.')
+        return
+      }
+
       const allowed = await checkIsAdmin(nextSession.user.id)
       if (!allowed) {
         await supabase.auth.signOut()
@@ -93,8 +107,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async (email: string, password: string) => {
     setAuthError(null)
+    if (!isAllowedAdminEmail(email)) {
+      throw new Error('Invalid login credentials')
+    }
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     })
     if (error) throw error
