@@ -6,9 +6,10 @@ Painel interno (React + Tailwind) com login para métricas do mesmo projeto Supa
 
 - **Visão geral (`/`):** médicos, pacientes, pacientes por médico
 - **Doações (`/doacoes`):** MRR estimado
-  - Médicos: assinaturas Stripe ativas/grace
+  - Médicos: assinaturas Stripe ativas/grace (portal)
   - Pacientes: apoiadores RevenueCat (espelhados em `profiles`)
-  - Total: soma dos dois
+  - Site: assinaturas Stripe de `/apoiar` (espelhadas em `public_supporters`)
+  - Total: soma dos três
 - **Uso de IA (`/ia`):** chamadas, erros, tokens, latência e custo estimado OpenAI (`ai_usage_logs`, últimos 7/30/90 dias)
 
 ## Setup
@@ -25,13 +26,24 @@ Preencha com o mesmo `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` dos outros p
 
 ```bash
 cd ../diabetes
-# … até 012_rx_ai_ops.sql (inclui get_admin_donation_stats atualizado + get_admin_ai_stats)
+# … até 023_public_supporters.sql (public_supporters + get_admin_donation_stats com site)
 supabase db query --linked -f supabase/migrations/010_admin_dashboard.sql
 supabase db query --linked -f supabase/migrations/011_admin_donations.sql
 supabase db query --linked -f supabase/migrations/012_rx_ai_ops.sql
+supabase db query --linked -f supabase/migrations/023_public_supporters.sql
 ```
 
-Isso cria `admin_users`, `is_admin()`, `get_admin_dashboard_stats()`, `get_admin_donation_stats()` e `get_admin_ai_stats()`.
+Isso cria `admin_users`, `is_admin()`, `get_admin_dashboard_stats()`, `get_admin_donation_stats()` (médicos + pacientes + site), `get_admin_ai_stats()` e a tabela `public_supporters`.
+
+Para popular doações do site já existentes no Stripe (após a migration e o deploy do webhook em `diabetes-medicos`):
+
+```bash
+cd ../diabetes-admin
+SUPABASE_URL="$VITE_SUPABASE_URL" \
+SUPABASE_SERVICE_ROLE_KEY="sua_service_role_key" \
+STRIPE_SECRET_KEY="sk_..." \
+npm run backfill:public-supporters
+```
 
 3. Crie o usuário admin (service role — **nunca** no Vite):
 

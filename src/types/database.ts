@@ -34,6 +34,7 @@ export type AdminDonationStats = {
   }
   doctors: AdminDonationSegment
   patients: AdminDonationSegment
+  website: AdminDonationSegment
 }
 
 export type AdminAiFunctionStat = {

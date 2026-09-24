@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "bootstrap:admin": "node scripts/bootstrap-admin.mjs"
+    "bootstrap:admin": "node scripts/bootstrap-admin.mjs",
+    "backfill:public-supporters": "node scripts/backfill-public-supporters.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

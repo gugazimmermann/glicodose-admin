@@ -14,7 +14,7 @@ import { SegmentedControl } from '../components/ui/SegmentedControl'
 import { Skeleton } from '../components/ui/Spinner'
 import { StatTile } from '../components/ui/StatTile'
 
-type Tab = 'total' | 'doctors' | 'patients'
+type Tab = 'total' | 'doctors' | 'patients' | 'website'
 
 function formatUpdatedAt(value: string | null): string {
   if (!value) return '—'
@@ -61,14 +61,21 @@ export function DonationsPage() {
 
   const summary = useMemo(() => {
     if (!stats) return null
+    const website = stats.website ?? {
+      active_count: 0,
+      monthly_brl: 0,
+      supporters: [],
+    }
     if (tab === 'doctors') return stats.doctors
     if (tab === 'patients') return stats.patients
+    if (tab === 'website') return website
     return {
       active_count: stats.total.active_count,
       monthly_brl: stats.total.monthly_brl,
       supporters: [
         ...stats.doctors.supporters,
         ...stats.patients.supporters,
+        ...website.supporters,
       ],
     }
   }, [stats, tab])
@@ -77,7 +84,7 @@ export function DonationsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Doações"
-        description="Assinaturas ativas de apoio: Stripe (médicos) e RevenueCat (pacientes)."
+        description="Assinaturas ativas de apoio: Stripe (médicos e site) e RevenueCat (pacientes)."
         action={
           <Button
             variant="secondary"
@@ -99,6 +106,7 @@ export function DonationsPage() {
           { value: 'total', label: 'Total' },
           { value: 'doctors', label: 'Médicos' },
           { value: 'patients', label: 'Pacientes' },
+          { value: 'website', label: 'Site' },
         ]}
       />
 
@@ -129,8 +137,8 @@ export function DonationsPage() {
 
       {tab === 'total' ? (
         <Alert variant="info">
-          O total soma apoiadores médicos (Stripe) e pacientes (RevenueCat /
-          lojas).
+          O total soma médicos (Stripe), pacientes (RevenueCat / lojas) e site
+          (Stripe /apoiar).
         </Alert>
       ) : null}
 
@@ -141,14 +149,18 @@ export function DonationsPage() {
               ? 'Apoiadores pacientes'
               : tab === 'doctors'
                 ? 'Apoiadores médicos'
-                : 'Apoiadores (todos)'}
+                : tab === 'website'
+                  ? 'Apoiadores do site'
+                  : 'Apoiadores (todos)'}
           </h2>
           <p className="mt-0.5 text-sm text-muted">
             {tab === 'patients'
               ? 'Planos ativos ou em carência via RevenueCat'
               : tab === 'doctors'
-                ? 'Planos Stripe ativos ou em carência'
-                : 'Médicos (Stripe) e pacientes (RevenueCat)'}
+                ? 'Planos Stripe ativos ou em carência (portal médico)'
+                : tab === 'website'
+                  ? 'Planos Stripe ativos ou em carência via /apoiar'
+                  : 'Médicos, pacientes e site'}
           </p>
         </div>
 
